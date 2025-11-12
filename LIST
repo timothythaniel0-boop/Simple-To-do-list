@@ -1,8 +1,9 @@
+<indek.html>
 <html lang="id">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Simple To-Do List</title>
+  <title>Simple To‑Do List</title>
   <style>
     :root{--bg:#f6f7fb;--card:#ffffff;--accent:#4f46e5;--muted:#6b7280}
     *{box-sizing:border-box}
@@ -29,11 +30,19 @@
   </style>
 </head>
 <body>
+  <!--
+    Simple To‑Do List App
+    Cara pakai:
+      1. Simpan file ini sebagai `simple-todo-list.html`.
+      2. Buka file di browser (double-click) — aplikasi berjalan lokal tanpa server.
+      3. Data disimpan di localStorage browser. Untuk menghapus data, klik 'Reset Data'.
+      4. Mau dipasang online? Upload file ini ke GitHub Pages, Netlify, atau Vercel.
+  -->
   <div class="container">
     <header>
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#eef2ff"/><path d="M7 12h10M7 8h10M7 16h6" stroke="#4f46e5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <div>
-        <h1>Simple To-Do List</h1>
+        <h1>Simple To‑Do List</h1>
         <div class="meta">Aplikasi minimal: daftar tugas & catatan ringan</div>
       </div>
     </header>
@@ -75,7 +84,7 @@
 
       <div>
         <div class="card">
-          <strong style="display:block;margin-bottom:10px">To-Do</strong>
+          <strong style="display:block;margin-bottom:10px">To‑Do</strong>
           <div class="controls">
             <input id="todoInput" type="text" placeholder="Tambah tugas baru" />
             <button id="addTodoBtn">Tambah</button>
@@ -95,7 +104,7 @@
     </div>
 
     <footer>
-      Dibuat cepat — buka file ini di browser untuk mengakses aplikasi Simple To-Do List.
+      Dibuat cepat — buka file ini di browser untuk mengakses aplikasi Simple To‑Do List.
     </footer>
   </div>
 
@@ -229,3 +238,4 @@
   </script>
 </body>
 </html>
+
