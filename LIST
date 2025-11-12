@@ -1,0 +1,231 @@
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simple To-Do List</title>
+  <style>
+    :root{--bg:#f6f7fb;--card:#ffffff;--accent:#4f46e5;--muted:#6b7280}
+    *{box-sizing:border-box}
+    body{font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:0; background:var(--bg); color:#111}
+    .container{max-width:900px;margin:28px auto;padding:20px}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    header h1{font-size:20px;margin:0}
+    .card{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
+    @media (max-width:860px){.grid{grid-template-columns:1fr}}
+    .controls{display:flex;gap:8px;margin-bottom:12px}
+    input[type=text], textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;font-size:14px}
+    button{background:var(--accent);color:white;border:0;padding:10px 12px;border-radius:8px;cursor:pointer}
+    button.secondary{background:#eef2ff;color:var(--accent);border:1px solid rgba(79,70,229,0.08)}
+    ul{list-style:none;padding:0;margin:0}
+    li{display:flex;align-items:center;justify-content:space-between;padding:10px;border-bottom:1px solid #f1f3f7}
+    .meta{color:var(--muted);font-size:12px}
+    .todo-left{display:flex;align-items:center;gap:12px}
+    .checkbox{width:18px;height:18px;border-radius:4px;border:1px solid #cfd8e6;display:inline-block}
+    .completed{text-decoration:line-through;color:#9aa4b2}
+    .small{font-size:13px}
+    .empty{padding:24px;text-align:center;color:var(--muted)}
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#eef2ff"/><path d="M7 12h10M7 8h10M7 16h6" stroke="#4f46e5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div>
+        <h1>Simple To-Do List</h1>
+        <div class="meta">Aplikasi minimal: daftar tugas & catatan ringan</div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <strong>Tambah Catatan</strong>
+            <div class="meta small">Data disimpan otomatis</div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <input id="noteTitle" type="text" placeholder="Judul catatan" />
+            <button id="addNoteBtn">Tambah</button>
+          </div>
+          <textarea id="noteBody" rows="4" placeholder="Isi catatan..."></textarea>
+
+          <hr style="margin:14px 0;border:none;border-top:1px solid #f1f3f7" />
+
+          <strong style="display:block;margin-bottom:8px">Daftar Catatan</strong>
+          <ul id="notesList"></ul>
+
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <strong>Pengaturan & Data</strong>
+            <div class="meta small">LocalStorage</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button id="exportBtn" class="secondary">Export JSON</button>
+            <button id="importBtn" class="secondary">Import JSON</button>
+            <button id="resetBtn" class="secondary">Reset Data</button>
+            <input id="fileInput" type="file" accept="application/json" style="display:none" />
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <strong style="display:block;margin-bottom:10px">To-Do</strong>
+          <div class="controls">
+            <input id="todoInput" type="text" placeholder="Tambah tugas baru" />
+            <button id="addTodoBtn">Tambah</button>
+          </div>
+          <ul id="todoList"></ul>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <strong>Petunjuk Cepat</strong>
+          <ol style="padding-left:18px;margin-top:8px;color:var(--muted)">
+            <li>Tambah catatan dan tugas menggunakan form di kiri/atas</li>
+            <li>Centang tugas untuk menandai selesai</li>
+            <li>Gunakan Export/Import untuk backup atau pindah perangkat</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Dibuat cepat — buka file ini di browser untuk mengakses aplikasi Simple To-Do List.
+    </footer>
+  </div>
+
+  <script>
+    const KEY = 'simple_todo_list_v1';
+    const defaultState = { notes: [], todos: [] };
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(KEY);
+        return raw ? JSON.parse(raw) : defaultState;
+      }catch(e){console.error('loadState', e); return defaultState}
+    }
+    function saveState(state){ localStorage.setItem(KEY, JSON.stringify(state)) }
+
+    let state = loadState();
+
+    const notesList = document.getElementById('notesList');
+    const addNoteBtn = document.getElementById('addNoteBtn');
+    const noteTitle = document.getElementById('noteTitle');
+    const noteBody = document.getElementById('noteBody');
+
+    const todoList = document.getElementById('todoList');
+    const todoInput = document.getElementById('todoInput');
+    const addTodoBtn = document.getElementById('addTodoBtn');
+
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const fileInput = document.getElementById('fileInput');
+
+    function render(){
+      notesList.innerHTML = '';
+      if(state.notes.length === 0){
+        notesList.innerHTML = '<li class="empty">Belum ada catatan</li>';
+      }else{
+        state.notes.slice().reverse().forEach((n, idx)=>{
+          const li = document.createElement('li');
+          const left = document.createElement('div'); left.className='todo-left';
+          const content = document.createElement('div');
+          content.innerHTML = `<div style="font-weight:600">${escapeHtml(n.title||'Tanpa Judul')}</div><div class="meta small">${escapeHtml(n.body||'')}</div>`;
+          left.appendChild(content);
+          const right = document.createElement('div');
+          right.innerHTML = `<button class="secondary small" data-i="${state.notes.length-1-idx}">Hapus</button>`;
+          li.appendChild(left); li.appendChild(right);
+          notesList.appendChild(li);
+        })
+      }
+
+      todoList.innerHTML = '';
+      if(state.todos.length===0){
+        todoList.innerHTML = '<li class="empty">Belum ada tugas</li>';
+      }else{
+        state.todos.forEach((t,i)=>{
+          const li = document.createElement('li');
+          const left = document.createElement('div'); left.className='todo-left';
+          const cb = document.createElement('div'); cb.className='checkbox';
+          if(t.done){ cb.style.background='linear-gradient(180deg,#e9eefc,#eef2ff)'; cb.innerHTML='✔'; }
+          const content = document.createElement('div');
+          content.innerHTML = `<div class="${t.done? 'completed':''}">${escapeHtml(t.text)}</div><div class="meta small">${new Date(t.created).toLocaleString()}</div>`;
+          left.appendChild(cb); left.appendChild(content);
+
+          const right = document.createElement('div');
+          right.innerHTML = `<div style="display:flex;gap:8px"><button class="secondary" data-action="toggle" data-i="${i}">${t.done? 'Batal':'Selesai'}</button><button class="secondary" data-action="delete" data-i="${i}">Hapus</button></div>`;
+
+          li.appendChild(left); li.appendChild(right);
+          todoList.appendChild(li);
+        })
+      }
+    }
+
+    function escapeHtml(str){ return String(str).replace(/[&<>"']/g, function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]}) }
+
+    addNoteBtn.addEventListener('click', ()=>{
+      const title = noteTitle.value.trim();
+      const body = noteBody.value.trim();
+      if(!title && !body){ alert('Tulis judul atau isi catatan dulu.'); return }
+      state.notes.push({title, body, created: Date.now()});
+      saveState(state); render(); noteTitle.value=''; noteBody.value='';
+    });
+
+    notesList.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button'); if(!btn) return;
+      const idx = Number(btn.dataset.i);
+      if(btn.textContent.includes('Hapus')){
+        if(confirm('Hapus catatan ini?')){
+          state.notes.splice(idx,1); saveState(state); render();
+        }
+      }
+    });
+
+    addTodoBtn.addEventListener('click', ()=>{
+      const text = todoInput.value.trim(); if(!text){alert('Tulis tugas dulu.'); return}
+      state.todos.push({text, done:false, created: Date.now()}); saveState(state); todoInput.value=''; render();
+    });
+
+    todoList.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button'); if(!btn) return;
+      const action = btn.dataset.action; const i = Number(btn.dataset.i);
+      if(action === 'toggle'){
+        state.todos[i].done = !state.todos[i].done; saveState(state); render();
+      }else if(action === 'delete'){
+        if(confirm('Hapus tugas ini?')){ state.todos.splice(i,1); saveState(state); render(); }
+      }
+    });
+
+    exportBtn.addEventListener('click', ()=>{
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'simple-todo-list-backup.json'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    importBtn.addEventListener('click', ()=> fileInput.click());
+    fileInput.addEventListener('change', async (ev)=>{
+      const file = ev.target.files[0]; if(!file) return;
+      try{
+        const txt = await file.text(); const obj = JSON.parse(txt);
+        if(!obj || typeof obj !== 'object'){ throw new Error('File bukan format yang dikenali') }
+        if(confirm('Menduplikat data dari file import — data lokal akan ditimpa. Lanjutkan?')){
+          state = obj; saveState(state); render(); alert('Import selesai');
+        }
+      }catch(err){ alert('Gagal import: '+err.message) }
+      fileInput.value = '';
+    });
+
+    resetBtn.addEventListener('click', ()=>{
+      if(confirm('Reset semua data dari aplikasi ini?')){ state = JSON.parse(JSON.stringify(defaultState)); saveState(state); render(); }
+    });
+
+    render();
+  </script>
+</body>
+</html>
